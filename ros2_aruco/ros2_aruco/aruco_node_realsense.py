@@ -38,6 +38,7 @@ from ros2_aruco import transformations
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseArray, Pose
+from std_msgs.msg import Float64MultiArray
 from ros2_aruco_interfaces.msg import ArucoMarkers
 
 
@@ -89,6 +90,8 @@ class ArucoNode(rclpy.node.Node):
         self.poses_pub = self.create_publisher(PoseArray, 'aruco_poses', 10)
         self.markers_pub = self.create_publisher(ArucoMarkers, 'aruco_markers', 10)
 
+        self.poses_corners_pub = self.create_publisher(Float64MultiArray, 'aruco_corners', 10)
+
         # Set up fields for camera parameters
         self.info_msg = None
         self.intrinsic_mat = None
@@ -114,6 +117,8 @@ class ArucoNode(rclpy.node.Node):
                                              desired_encoding='bgr8')
         markers = ArucoMarkers()
         pose_array = PoseArray()
+        aruco_corners = Float64MultiArray()
+
         if self.params_dict['camera_frame'] is None or len(self.params_dict['camera_frame']) == 0:
             markers.header.frame_id = self.info_msg.header.frame_id
             pose_array.header.frame_id = self.info_msg.header.frame_id
@@ -157,14 +162,42 @@ class ArucoNode(rclpy.node.Node):
                 markers.poses.append(pose)
                 markers.marker_ids.append(marker_id[0])
 
-            cv_image = cv2.circle(cv_image, (corners[0][0][0][0], corners[0][0][0][1]), 2, [255, 0, 255], 2)
-            cv_image = cv2.circle(cv_image, (corners[0][0][1][0], corners[0][0][1][1]), 2, [255, 0, 255], 2)
-            cv_image = cv2.circle(cv_image, (corners[0][0][2][0], corners[0][0][2][1]), 2, [255, 0, 255], 2)
+            for corner in range(len(corners[0][0])):
+                aruco_corners.data.append(corners[0][0][corner][0])
+                aruco_corners.data.append(corners[0][0][corner][1])
+
+            cv_image = cv2.circle(cv_image, (corners[0][0][0][0], corners[0][0][0][1]), 2, [255, 0, 0], 2)
+            cv_image = cv2.circle(cv_image, (corners[0][0][1][0], corners[0][0][1][1]), 2, [0, 255, 0], 2)
+            cv_image = cv2.circle(cv_image, (corners[0][0][2][0], corners[0][0][2][1]), 2, [0, 0, 255], 2)
             cv_image = cv2.circle(cv_image, (corners[0][0][3][0], corners[0][0][3][1]), 2, [255, 0, 255], 2)
+
+            mid_0 = corners[0][0][0][0] + (corners[0][0][1][0] - corners[0][0][0][0])/2
+            mid_1 = corners[0][0][2][1] + (corners[0][0][0][1] - corners[0][0][2][1])/2
+
+            cv_image = cv2.circle(cv_image, (int(mid_0), int(mid_1)), 2, [0, 0, 0], 4)
+            # mid_1 = (points[0][1] + points[2][1]) / 2
+            #
+            # mid[0] = (points[0][0] + points[2][0]) / 2
+            # mid[1] = (points[0][1] + points[2][1]) / 2
+
             cv2.imshow('test', cv_image)
             cv2.waitKey(3)
+            self.poses_corners_pub.publish(aruco_corners)
             self.poses_pub.publish(pose_array)
             self.markers_pub.publish(markers)
+
+        else:
+            pose = Pose()
+            pose.position.x = np.inf
+            pose.position.y = np.inf
+            pose.position.z = np.inf
+
+            pose.orientation.x = np.inf
+            pose.orientation.y = np.inf
+            pose.orientation.z = np.inf
+            pose.orientation.w = np.inf
+            pose_array.poses.append(pose)
+            self.poses_pub.publish(pose_array)
 
 
 def main():
