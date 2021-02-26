@@ -2,8 +2,10 @@
   ros__parameters:
     marker_size: 0.0625
     aruco_dictionary_id: "DICT_6X6_250"
-#    image_topic: "/watney/camera_left/color/image_raw"
-    image_topic: "/camera_left/color/image_raw"
-#    camera_info_topic: "/watney/camera_left/color/camera_info"
-    camera_info_topic: "/camera_left/color/camera_info"
-    camera_frame: None
+    image_topic: "/watney/camera_left/color/image_raw"
+#    image_topic: "/camera_left/color/image_raw"
+#    image_topic: "/camera/color/image_raw"
+    camera_info_topic: "/watney/camera_left/color/camera_info"
+#    camera_info_topic: "/camera_left/color/camera_info"
+#    camera_info_topic: "/camera/color/camera_info"
+#    camera_frame: None #for now we just use the camera frame (default frame if nothing parsed)
