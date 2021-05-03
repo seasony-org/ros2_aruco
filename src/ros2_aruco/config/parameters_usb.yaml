@@ -1,4 +1,4 @@
-/aruco_node_realsense:
+/aruco_node_realsense_usb:
   ros__parameters:
     marker_size: 0.0625
     aruco_dictionary_id: "DICT_6X6_250"

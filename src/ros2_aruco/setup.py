@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'aruco_node = ros2_aruco.aruco_node:main',
             'aruco_node_realsense = ros2_aruco.aruco_node_realsense:main',
+            'aruco_node_realsense_usb = ros2_aruco.aruco_node_realsense_usb:main',
             'aruco_generate_marker = ros2_aruco.aruco_generate_marker:main'
         ],
     },
